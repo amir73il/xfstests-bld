@@ -40,6 +40,7 @@ pciutils
 procps
 psmisc
 python2.7
+python3
 python-future
 openssl
 reiserfsprogs
