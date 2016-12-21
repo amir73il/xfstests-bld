@@ -20,3 +20,6 @@ localhost:/scratch /mnt/scratch nfs defaults,noauto	0	0
 
 /vdc/scratch	/scratch none	defaults,noauto,bind	0	0
 /vdc/test	/test	 none	defaults,noauto,bind	0	0
+
+# For unionmount run --ov --samefs, do e.g.: cp -a /dev/vdf /dev-lower_layer
+/dev-lower_layer /base	auto	defaults,noauto		0	0
