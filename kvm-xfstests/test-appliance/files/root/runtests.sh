@@ -380,6 +380,11 @@ do
 	    echo TEST_SET_EXCLUDE: $TEST_SET_EXCLUDE
 	    echo TEST_SET_EXCLUDE: $XFS_IO_AVOID >> "$RESULT_BASE/config"
 	fi
+	if [ "$FS" = overlay ]; then
+		# with an overlay configuration preserve base FSTYP
+		# in OVL_BASE_FSTYP
+		export OVL_BASE_FSTYP="$FSTESTTYP"
+	fi
 	export FSTYP=$FS
 	AEX=""
 	if test -n "$DO_AEX" ; then
