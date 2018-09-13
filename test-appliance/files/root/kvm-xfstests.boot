@@ -162,6 +162,14 @@ then
 	poweroff -f > /dev/null 2>&1
 fi
 
+if test "$CMD" = "run"
+then
+	if test -x /vtmp/run
+	then
+		/vtmp/run
+	fi
+fi
+
 if test -n "$DO_BLKTESTS"
 then
     if test -n "$RUN_ON_GCE"
