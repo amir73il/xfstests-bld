@@ -1040,6 +1040,9 @@ EOF
 	ltp)
 	    ARG="cmd=ltp"
 	    ;;
+	run)
+	    ARG="cmd=run"
+	    ;;
 	ver)
 	    ARG="cmd=ver"
 	    ;;
