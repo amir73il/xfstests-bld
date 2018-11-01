@@ -9,7 +9,7 @@ function __fsck()
 	local dev="$1"
 
 	case "$FSTESTTYP" in
-	    ext4)
+	    ext2|ext4)
 		/sbin/e2fsck -fy "$dev"
 		;;
 	    xfs)
@@ -54,8 +54,8 @@ function __mkfs()
 	local dev="$1"
 
 	case "$FSTESTTYP" in
-	    ext4)
-		/sbin/mke2fs -F -q -t ext4 "$dev"
+	    ext2|ext4)
+		/sbin/mke2fs -F -q -t "$FSTESTTYP" "$dev"
 		;;
 	    xfs)
 		mkfs.xfs -f -m rmapbt=1,reflink=1 "$dev"
