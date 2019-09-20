@@ -80,6 +80,17 @@ cp bld/bin/* bld/sbin/* xfstests/bin
 if test -d bld/usr/bin ; then
     cp bld/usr/bin/* xfstests/bin
 fi
+# install overlayfs test tools
+if test -d unionmount-testsuite
+then
+    umts=$(realpath unionmount-testsuite)
+    cp -r $umts xfstests/src/
+    (cd xfstests/src/unionmount-testsuite; rm -rf .git __pycache__ tests/__pycache__)
+fi
+if test -x overlayfs-progs/fsck.overlay
+then
+    cp overlayfs-progs/fsck.overlay xfstests/bin/
+fi
 cp bld/lib/client.txt xfstests/lib
 if test -d bld/share/man ; then
     mkdir -p xfstests/share/man
