@@ -40,6 +40,7 @@ print_help ()
     echo "Usage: $PROG [<OPTIONS>] -g <group> ..."
     echo "Usage: $PROG [<OPTIONS>] shell|maint"
     echo "Usage: $PROG [<OPTIONS>] syz <repro>"
+    echo "Usage: $PROG [<OPTIONS>] ltp"
     echo ""
     echo "Common options are:"
     echo "	-a		- Disable auto-exclude; run all tests"
@@ -945,6 +946,9 @@ EOF
 	    supported_flavors gce
 	    ARG="cmd=pts"
 	    DO_PTS="yes"
+	    ;;
+	ltp)
+	    ARG="cmd=ltp"
 	    ;;
 	ver)
 	    ARG="cmd=ver"
