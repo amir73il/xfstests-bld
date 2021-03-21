@@ -155,6 +155,13 @@ then
     fi
 fi
 
+if test "$CMD" = "ltp"
+then
+	cd /root/ltp
+	./runltp.sh
+	poweroff -f > /dev/null 2>&1
+fi
+
 if test -n "$DO_BLKTESTS"
 then
     if test -n "$RUN_ON_GCE"
