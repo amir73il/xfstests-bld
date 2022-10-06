@@ -46,7 +46,7 @@ case "$1" in
 	;;
 esac
 
-QUIET="quiet loglevel=0"
+#QUIET="quiet loglevel=0"
 
 . $DIR/util/parse_cli
 
