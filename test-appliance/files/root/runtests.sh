@@ -166,7 +166,7 @@ else
 fi
 
 RPT_COUNT=1
-FAIL_LOOP_COUNT=4
+FAIL_LOOP_COUNT=0
 NO_TRUNCATE=
 
 while [ "$1" != "" ]; do
