@@ -1,0 +1,138 @@
+#
+# Configuration file for fuse passthrough
+#
+
+DEFAULT_MKFS_OPTIONS=""
+
+function __fsck()
+{
+	local dev="$1"
+
+	case "$BASE_FSTYPE" in
+	    ext4)
+		/sbin/e2fsck -fy "$dev"
+		;;
+	    xfs)
+		xfs_repair "$dev"
+		;;
+	esac
+}
+
+function __check_filesystem()
+{
+	local tst_dev="$1"
+	local tst_mnt="$2"
+	local scr_dev="$3"
+	local scr_mnt="$4"
+
+	umount $tst_dev >& /dev/null
+	__fsck "$tst_dev"
+	ret="$?"
+	mount -t $BASE_FSTYPE $tst_dev $tst_mnt
+	echo fsck for "$BASE_FSTYPE" on test device exited with status "$ret"
+
+	umount $scr_dev >& /dev/null
+	__fsck "$scr_dev"
+	ret2="$?"
+	mount -t $BASE_FSTYPE $scr_dev $scr_mnt
+	echo fsck for "$BASE_FSTYPE" on scratch device exited with status "$ret"
+
+	if test "$ret" -eq 0 ; then
+		ret=$ret2
+	fi
+	return "$ret"
+}
+
+function check_filesystem()
+{
+	echo check_filesystem\(\) should be overriden by a test cfg file.
+	return -1
+}
+
+function __mkfs()
+{
+	local dev="$1"
+
+	case "$BASE_FSTYPE" in
+	    ext4)
+		/sbin/mke2fs -F -q -t ext4 -O verity "$dev"
+		;;
+	    xfs)
+		mkfs.xfs -f "$dev"
+		;;
+	esac
+}
+
+function __format_filesystem()
+{
+	local tst_dev="$1"
+	local tst_mnt="$2"
+	local scr_dev="$3"
+	local scr_mnt="$4"
+
+	umount $tst_dev >& /dev/null
+	__mkfs $tst_dev
+	mount -t $BASE_FSTYPE $tst_dev $tst_mnt
+	mkdir -p $tst_mnt/fuse-src
+	export TEST_DEV=source:$tst_mnt/fuse-src
+
+	umount $scr_dev >& /dev/null
+	__mkfs $scr_dev
+	mount -t $BASE_FSTYPE $scr_dev $scr_mnt
+	mkdir -p $scr_mnt/fuse-src
+	export SCRATCH_DEV=source:$scr_mnt/fuse-src
+
+	return 0
+}
+
+function format_filesystem()
+{
+	echo format_filesystem\(\) should be overriden by a test cfg file.
+	return -1
+}
+
+function setup_mount_opts()
+{
+    if test -n "$MNTOPTS" ; then
+	if test -n "$FUSE_MOUNT_OPTIONS" ; then
+            export FUSE_MOUNT_OPTIONS="$FUSE_MOUNT_OPTIONS,$MNTOPTS"
+	else
+	    export FUSE_MOUNT_OPTIONS="-o $MNTOPTS"
+	fi
+    fi
+
+    export FSTYP=fuse
+    export TEST_DIR=/fuse/test
+    export SCRATCH_MNT=/fuse/scratch
+    mkdir -p /fuse/test /fuse/scratch
+}
+
+function get_mkfs_opts()
+{
+    :
+}
+
+
+function show_mkfs_opts()
+{
+    :
+}
+
+function show_mount_opts()
+{
+    echo FUSE_MOUNT_OPTIONS: "$FUSE_MOUNT_OPTIONS"
+    echo BASE_FSTYPE: "$BASE_FSTYPE"
+}
+
+function test_name_alias()
+{
+    case "$1" in
+	default)	echo "passthrough" ;;
+	*)		echo "$1" ;;
+    esac
+}
+
+function reset_vars()
+{
+    unset FUSE_MOUNT_OPTIONS
+}

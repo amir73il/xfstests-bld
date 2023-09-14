@@ -1,0 +1,15 @@
+function check_filesystem()
+{
+	__check_filesystem "$SM_TST_DEV" "$SM_TST_MNT" "$SM_SCR_DEV" "$SM_SCR_MNT"
+}
+
+function format_filesystem()
+{
+	__format_filesystem "$SM_TST_DEV" "$SM_TST_MNT" "$SM_SCR_DEV" "$SM_SCR_MNT"
+}
+
+SIZE=small
+TESTNAME="fuse passthrough"
+export FUSE_SUBTYP=.passthrough
+export MOUNT_OPTIONS="-oallow_other,default_permissions"
+export TEST_FS_MOUNT_OPTS="-oallow_other,default_permissions"
