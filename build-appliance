@@ -135,15 +135,16 @@ set_canonicalized_arch "$MY_ARCH"
 
 cd fstests-bld
 
+gen_tarball_args=
 if $UPDATE; then
     $BUILD_ENV ./update-all
     gen_image_args+=" --update"
+elif test -z "$NO_BUILD" ; then
+    $BUILD_ENV make all-clean-first
 else
-    if test -z "$NO_BUILD" ; then
-	$BUILD_ENV make all-clean-first
-    fi
+    gen_tarball_args+=" --fast"
 fi
-$BUILD_ENV ./gen-tarball --arch "$ARCH"
+$BUILD_ENV ./gen-tarball $gen_tarball_args --arch "$ARCH"
 
 case "$OUT_TAR" in
     both) gen_image_args+=" --both" ;;
@@ -153,7 +154,7 @@ esac
 if test -n "$ADD_PACKAGES" ; then
     a=$(echo $ADD_PACKAGES | sed -e 's/ /,/')
     gen_image_args+=" -a $a"
-    gce_image_args+= "--add-package $a"
+    gce_image_args+=" --add-package $a"
     unset a
 fi
 
