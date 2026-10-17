@@ -155,6 +155,13 @@ then
     fi
 fi
 
+if test "$CMD" = "selftests"
+then
+	cd /root/selftests
+	./runselftests.sh
+	poweroff -f > /dev/null 2>&1
+fi
+
 if test "$CMD" = "ltp"
 then
 	cd /root/ltp
