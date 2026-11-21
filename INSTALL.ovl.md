@@ -116,6 +116,59 @@ tree. The image written is `test-appliance/root_fs.img.amd64`.
     schroot -c trixie-amd64 -u root -- ./gen-image --networking --update \
         --src_date @$(git -C .. log -1 --pretty=%ct)
 
+## Running the VM as a non-root user
+
+`kvm-xfstests` needs root only to open its test devices. `/dev/kvm` is
+already usable through the `kvm` group, and the VM uses QEMU user-mode
+networking. Grant access to just those devices. Don't add the user to
+the `disk` group, and don't add a NOPASSWD sudoers rule. The test LVs
+live in `ubuntu-vg` next to the `root`, `swap_1`, `images` and `private`
+volumes, so either of those would amount to root.
+
+A udev rule gives the user only the six test LVs (`VDB`..`VDG` in
+`~/.config/kvm-xfstests`). It is applied again whenever the volumes
+appear, including at boot. udev doesn't expand variables, so create
+the rule from the user's shell, so that `$USER` is filled in:
+
+    echo 'ENV{DM_VG_NAME}=="ubuntu-vg", ENV{DM_LV_NAME}=="test-4k|test-1k|test-lg|scratch|scratch-lg|results", OWNER="'$USER'", MODE="0660"' |
+        sudo tee /etc/udev/rules.d/99-kvm-xfstests.rules
+    sudo udevadm control --reload
+    sudo udevadm trigger --subsystem-match=block
+
+The tiny test devices `vdi` and `vdj` are files under
+`run-fstests/disks/`:
+
+    sudo chown -R $USER: run-fstests/disks
+
+Without sudo, `USER` is the login user, and `kvm-xfstests` would use
+`/tmp/kvm-xfstests-$USER` as the 9p dir (`/vtmp` in the guest). Pin it in
+`~/.config/kvm-xfstests`, so runs with and without sudo share
+`/tmp/kvm-xfstests-root`:
+
+    VIRTFS_PATH=${VIRTFS_PATH:-/tmp/kvm-xfstests-root}
+
+Put it before the block in that file that creates the dir and makes it
+mode 777.
+
+Check the result. Only the test LVs should be owned by the user:
+
+    ls -lL /dev/ubuntu-vg/
+
+Then run the selftests without sudo. The console log in
+`run-fstests/logs/` is then owned by the user:
+
+    kvm-xfstests selftests
+
+`sudo -E kvm-xfstests ...` still works. Never run two VMs at once,
+whether as root or not: they would share and corrupt the test LVs.
+
+`kvm-xfstests run` boots non-interactively, runs `/vtmp/run` if it is
+executable, and then idles at the auto-login root shell. With no
+`/vtmp/run`, it is an idle VM that the serial consoles on ports 7501 and
+7502 can drive. When a selftest fails, `kvm-xfstests selftests` also
+stops at that shell instead of powering off. Stop it with
+`systemctl poweroff` on a console.
+
 ## Run
 
     kvm-xfstests ltp
